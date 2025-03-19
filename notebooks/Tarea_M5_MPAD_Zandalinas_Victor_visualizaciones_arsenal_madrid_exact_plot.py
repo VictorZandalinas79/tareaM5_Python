@@ -1,116 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
-
-
-# Añadimos importaciones necesarias
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sns
-import matplotlib.gridspec as gridspec
-from scipy.spatial import ConvexHull
-import matplotlib.image as mpimg
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
-
-# Intentamos importar FontManager o crear un sustituto si no está disponible
-try:
-    from mplsoccer import FontManager, Pitch
-except ImportError:
-    print("Biblioteca mplsoccer no disponible, usando un reemplazo simple")
-    # Creamos una clase sustituta para FontManager
-    class FontManager:
-        def __init__(self, url=None):
-            self.prop = None
-            print("FontManager simulada creada")
-
-    # Creamos una clase sustituta para Pitch
-    class Pitch:
-        def __init__(self, pitch_type='opta', pad_bottom=0, pad_top=0, pad_left=0, pad_right=0, 
-                    line_zorder=1, line_color='white', pitch_color='#22312b', axis=True, label=True, stripe=False):
-            self.pitch_type = pitch_type
-            self.line_color = line_color
-            self.pitch_color = pitch_color
-
-        def draw(self, ax=None):
-            if ax is None:
-                ax = plt.gca()
-            # Dibujamos un rectángulo que simula un campo
-            ax.add_patch(plt.Rectangle((0, 0), 100, 100, color=self.pitch_color, zorder=0))
-            # Línea central
-            ax.plot([50, 50], [0, 100], color=self.line_color, zorder=1)
-            # Círculo central
-            circle = plt.Circle((50, 50), 9.15, fill=False, color=self.line_color, zorder=1)
-            ax.add_patch(circle)
-            return ax
-
-        def grid(self, figheight=10, title_height=0.08, endnote_space=0, title_space=0, 
-                grid_height=0.82, endnote_height=0.05, axis=True):
-            fig = plt.figure(figsize=(figheight*1.5, figheight))
-            axs = {}
-            axs['pitch'] = fig.add_subplot(111)
-            axs['title'] = axs['pitch']
-            axs['endnote'] = axs['pitch']
-            self.draw(ax=axs['pitch'])
-            return fig, axs
-
-        def bin_statistic(self, x, y, statistic='count', bins=(5,5)):
-            # Simulamos un bin_statistic simple
-            return {'statistic': np.random.rand(bins[0], bins[1])}
-
-        def heatmap(self, bin_statistic, ax=None, cmap='viridis'):
-            if ax is None:
-                ax = plt.gca()
-            return ax.imshow(bin_statistic['statistic'], cmap=cmap, origin='lower', extent=[0, 100, 0, 100], alpha=0.6)
-
-        def scatter(self, x, y, s=None, c=None, **kwargs):
-            ax = kwargs.get('ax', plt.gca())
-            return ax.scatter(x, y, s=s, c=c)
-
-        def annotate(self, text, xy, **kwargs):
-            ax = kwargs.get('ax', plt.gca())
-            return ax.annotate(text, xy, **kwargs)
-
-        def lines(self, x, y, x_end, y_end, **kwargs):
-            ax = kwargs.get('ax', plt.gca())
-            for x1, y1, x2, y2 in zip(x, y, x_end, y_end):
-                ax.plot([x1, x2], [y1, y2], **kwargs)
-            return ax.collections
-
-        def flow(self, x, y, end_x, end_y, **kwargs):
-            ax = kwargs.get('ax', plt.gca())
-            # Simplemente pasamos las coordenadas a lines
-            for x1, y1, x2, y2 in zip(x, y, end_x, end_y):
-                ax.arrow(x1, y1, (x2-x1)/2, (y2-y1)/2, 
-                        head_width=2, head_length=2, fc=kwargs.get('color', 'white'), 
-                        ec=kwargs.get('color', 'white'), alpha=0.7)
-            return ax.collections
-
-# Si no existe eventos.csv, creamos un dataframe dummy
-if not os.path.exists('eventos.csv'):
-    print("Creando dataframe dummy para eventos")
-    df_eventos = pd.DataFrame({
-        'teamName': ['Arsenal', 'Arsenal', 'Real Madrid', 'Real Madrid'] * 50,
-        'type': ['Pass', 'BlockedPass', 'Interception', 'BallRecovery'] * 50,
-        'player_name': ['Jugador 1', 'Jugador 2', 'Jugador 3', 'Jugador 4'] * 50,
-        'jersey_number': [1, 2, 3, 4] * 50,
-        'formation_slot': [2, 3, 4, 5] * 50,
-        'x': np.random.rand(200) * 100,
-        'y': np.random.rand(200) * 100,
-        'endX': np.random.rand(200) * 100,
-        'endY': np.random.rand(200) * 100,
-        'minute': np.random.randint(1, 90, 200),
-        'second': np.random.randint(0, 60, 200)
-    })
-    df_eventos.to_csv('eventos.csv', index=False)
-else:
-    # Importar con low_memory=False para evitar el warning
-    df_eventos = pd.read_csv('eventos.csv', low_memory=False)
-
-# Ya podemos continuar con el resto del código
-
-
 # ### d) Análisis Exploratorio de Datos (EDA) (10 puntos)
 
 # * Genere al menos 3 visualizaciones relevantes que proporcionen insights sobre los datos.
@@ -976,20 +866,10 @@ plt.show()
 # In[ ]:
 
 
-# Código para guardar la última figura generada
+# Solo guardamos la figura actual, sin crear alternativas
 import matplotlib.pyplot as plt
-import os
 
-# Guardar la figura actual si existe
-if plt.get_fignums():
-    plt.savefig('visualizacion_arsenal_madrid.png', dpi=300, bbox_inches='tight')
-    print("Figura guardada como 'visualizacion_arsenal_madrid.png'")
-else:
-    # Si no hay figuras activas, intentar buscar la última
-    for i in range(10, 0, -1):  # Buscar desde Figure 10 hasta Figure 1
-        if plt.fignum_exists(i):
-            plt.figure(i)
-            plt.savefig('visualizacion_arsenal_madrid.png', dpi=300, bbox_inches='tight')
-            print(f"Guardada figura {i} como 'visualizacion_arsenal_madrid.png'")
-            break
+# Guardamos la figura con alta calidad
+plt.savefig('exact_plot.png', dpi=300, bbox_inches='tight')
+print("Figura original guardada como 'exact_plot.png'")
 
